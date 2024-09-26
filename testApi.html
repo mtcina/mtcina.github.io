@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+<p id="bus">Fetch a file to change this text.</p>
+<p id="utime">Unix Time.</p>
+<p id="time">Time</p>
+<script>
+
+getText("https://countdown.api.tfl.gov.uk/interfaces/ura/instant_V1");
+
+async function getText(file) {
+    let myObject = await fetch(file);
+    let myText = await myObject.text();
+
+    let idxBusStop = myText.indexOf("Field Mead")
+    let idxEOL = myText.indexOf("]",idxBusStop)
+    let busStopLine = myText.substring(idxBusStop, idxEOL);
+    
+    let unix_timestamp = busStopLine.substring(busStopLine.lastIndexOf(",")+1)
+    
+    var busTime = new Date(unix_timestamp * 1000);
+
+    document.getElementById("bus").innerHTML = busStopLine;
+    document.getElementById("utime").innerHTML = unix_timestamp;
+    document.getElementById("time").innerHTML = busTime;
+}
+
+
+
+</script>
+</body>
+</html>
