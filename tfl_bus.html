@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus 303 Arrival Times</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #bus-times {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bus 303 Arrival Times</h1>
+  <p>Upcoming buses for route 303 at your selected stop:Woodcroft Avenue: toward Kingsbury Cirlce</p>
+  <div id="bus-times">Loading...</div>
+
+  <script>
+    // Replace with your actual API credentials
+    
+    const appKey = '9d9eb309bb9b4df0858e329ab43ed5b2';
+
+    // Bus stop ID for a specific stop (replace with the stop ID for the 303 route)
+    const stopPointId = '490009468S';  // Example bus stop ID, replace with an actual one
+
+    // Fetch bus arrival data
+    async function getBusTimes() {
+      const url = `https://api.tfl.gov.uk/StopPoint/${stopPointId}/Arrivals?app_key=${appKey}`;
+      const busTimesDiv = document.getElementById('bus-times');
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Filter the results for the 303 bus route
+        const bus303 = data.filter(bus => bus.lineId === '303');
+
+        // Sort buses by time to arrival
+        bus303.sort((a, b) => a.timeToStation - b.timeToStation);
+
+        // Display the bus times
+        if (bus303.length === 0) {
+          busTimesDiv.innerHTML = 'No buses arriving soon.';
+        } else {
+          busTimesDiv.innerHTML = '';
+          bus303.forEach(bus => {
+            const minutes = Math.round(bus.timeToStation / 60);
+            const busInfo = `Bus ${bus.lineName} to ${bus.destinationName} will arrive in ${minutes} minutes.<br>`;
+            busTimesDiv.innerHTML += busInfo;
+          });
+        }
+      } catch (error) {
+        busTimesDiv.innerHTML = 'Error fetching bus data.';
+        console.error('Error fetching bus data:', error);
+      }
+    }
+
+    // Call the function
+    getBusTimes();
+  </script>
+
+</body>
+</html>
