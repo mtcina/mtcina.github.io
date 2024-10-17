@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus 303 Arrival Times</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #bus-times {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bus 303 Arrival Times</h1>
+  <p>Upcoming buses for route 303 at Woodcroft Avenue (toward Kingsbury Circle):</p>
+  <div id="bus-times">Loading...</div>
+
+  <script>
+    // Basic XMLHttpRequest for Opera Mini compatibility
+    function getBusTimes() {
+      var xhr = new XMLHttpRequest();
+      var stopPointId = '490009468S'; // Stop ID for Woodcroft Avenue towards Kingsbury Circle
+      var appKey = '9d9eb309bb9b4df0858e329ab43ed5b2'; // Replace with your actual API key
+      var url = 'https://api.tfl.gov.uk/StopPoint/' + stopPointId + '/Arrivals?app_key=' + appKey;
+
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          var bus303 = [];
+          for (var i = 0; i < data.length; i++) {
+            if (data[i].lineId === '303') {
+              bus303.push(data[i]);
+            }
+          }
+
+          // Sort buses by time to arrival
+          bus303.sort(function(a, b) {
+            return a.timeToStation - b.timeToStation;
+          });
+
+          var busTimesDiv = document.getElementById('bus-times');
+          busTimesDiv.innerHTML = '';
+
+          if (bus303.length === 0) {
+            busTimesDiv.innerHTML = 'No buses arriving soon.';
+          } else {
+            for (var j = 0; j < bus303.length; j++) {
+              var minutes = Math.round(bus303[j].timeToStation / 60);
+              var busInfo = 'Bus ' + bus303[j].lineName + ' to ' + bus303[j].destinationName + ' will arrive in ' + minutes + ' minutes.<br>';
+              busTimesDiv.innerHTML += busInfo;
+            }
+          }
+        } else if (xhr.readyState === 4) {
+          document.getElementById('bus-times').innerHTML = 'Error fetching bus data.';
+        }
+      };
+
+      xhr.open('GET', url, true);
+      xhr.send();
+    }
+
+    // Call the function
+    getBusTimes();
+  </script>
+
+</body>
+</html>
