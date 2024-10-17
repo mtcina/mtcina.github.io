@@ -18,19 +18,36 @@
       border: 1px solid #ccc;
       background-color: #f9f9f9;
     }
+    #current-time {
+      font-size: 16px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
 
-  <h1>Bus 303 Arrival Times</h1>
-  <p>Upcoming buses for route 303 at Woodcroft Avenue (toward Kingsbury Circle):</p>
+  <h1>Bus 303 Arrival Times <span id="current-time"></span></h1>
+  <p>Upcoming buses for route 303 at Field Mead (toward Kingsbury Circle):</p>
   <div id="bus-times">Loading...</div>
 
   <script>
+    // Function to display the current time
+    function displayCurrentTime() {
+      var currentTime = new Date();
+      var hours = currentTime.getHours();
+      var minutes = currentTime.getMinutes();
+      var formattedTime = (hours < 10 ? '0' : '') + hours + ':' + (minutes < 10 ? '0' : '') + minutes;
+      document.getElementById('current-time').textContent = ' (Current Time: ' + formattedTime + ')';
+    }
+
+    // Update the current time every minute
+    setInterval(displayCurrentTime, 60000); // Update every 60 seconds
+    displayCurrentTime(); // Initial call to display the time immediately
+
     // Basic XMLHttpRequest for Opera Mini compatibility
     function getBusTimes() {
       var xhr = new XMLHttpRequest();
-      var stopPointId = '490009468S'; // Stop ID for Woodcroft Avenue towards Kingsbury Circle
+      var stopPointId = '490014664W'; // Stop ID for Field Mead towards Kingsbury Circle
       var appKey = '9d9eb309bb9b4df0858e329ab43ed5b2'; // Replace with your actual API key
       var url = 'https://api.tfl.gov.uk/StopPoint/' + stopPointId + '/Arrivals?app_key=' + appKey;
 
@@ -57,7 +74,16 @@
           } else {
             for (var j = 0; j < bus303.length; j++) {
               var minutes = Math.round(bus303[j].timeToStation / 60);
-              var busInfo = 'Bus ' + bus303[j].lineName + ' to ' + bus303[j].destinationName + ' will arrive in ' + minutes + ' minutes.<br>';
+              var currentTime = new Date();
+              var arrivalTime = new Date(currentTime.getTime() + bus303[j].timeToStation * 1000); // Convert seconds to milliseconds
+
+              // Format the arrival time as HH:MM
+              var hours = arrivalTime.getHours();
+              var minutesArrival = arrivalTime.getMinutes();
+              var formattedTime = (hours < 10 ? '0' : '') + hours + ':' + (minutesArrival < 10 ? '0' : '') + minutesArrival;
+
+              var busInfo = 'Bus ' + bus303[j].lineName + ' to ' + bus303[j].destinationName +
+                            ' will arrive in ' + minutes + ' minutes (at ' + formattedTime + ').<br>';
               busTimesDiv.innerHTML += busInfo;
             }
           }
